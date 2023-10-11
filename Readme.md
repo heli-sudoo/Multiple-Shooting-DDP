@@ -42,3 +42,13 @@ IIWA_Swing
 ```
 Quadrotor_fly
 ```
+
+## To Cite
+```
+@article{li2023unified,
+  title={A Unified Perspective on Multiple Shooting In Differential Dynamic Programming},
+  author={Li, He and Yu, Wenhao and Zhang, Tingnan and Wensing, Patrick M},
+  journal={arXiv preprint arXiv:2309.07872},
+  year={2023}
+}     
+```
