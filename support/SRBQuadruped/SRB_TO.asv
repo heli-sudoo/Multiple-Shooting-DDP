@@ -1,0 +1,21 @@
+% Dynamics setup
+mc_param = getMiniCheetahParams();
+SRB_param = compute_SRBD_inertia(mc_param);
+SRBFuncs = DynamicsSupportEulrate(SRB_param);
+
+% Cost function
+pos_des = [0, 0, 0.28]';
+eul_des = [0, 0, 0]';
+vel_des = [0, 0, 0]';
+eulrate_des = [0, 0, 0]';
+x_des = [pos_des; eul_des; vel_des; eulrate_des];
+u_
+px_FL = 0.209;
+py_FL = 0.111;
+pFoot = [px_FL, py_FL, 0, px_FL, -py_FL, 0, ... 
+             -px_FL, py_FL, 0, -px_FL, -py_FL, 0];
+Q_cost = diag([.1, .1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
+R_cost = diag(.5 * ones(1,12));
+
+running_cost = @(x, u) (0.5*(x-)) 
+

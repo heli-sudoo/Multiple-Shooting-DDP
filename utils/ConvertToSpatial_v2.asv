@@ -1,0 +1,82 @@
+function robot = ConvertToSpatial_v2(RBDtree)
+% For now, we ignore the fixed joints
+nb = 0;
+for i = 1:RBDtree.NumBodies
+    if ~strcmp(RBDtree.Bodies{i}.Joint.Type, 'fixed')
+        nb = nb+1;
+    end
+end
+
+robot.NB = nb;                                 
+robot.parent  = zeros(1,robot.NB);             % parent body indices
+robot.Xtree   = repmat({eye(6)},robot.NB,1)';   % coordinate transforms
+robot.jtype   = repmat({'  '},robot.NB,1)';     % joint types
+robot.I       = repmat({zeros(6)},robot.NB,1)'; % spatial inertias
+robot.gravity = [0 0 -9.81]';  
+
+nb = 1;
+for i = 1:RBDtree.NumBodies       
+    % Ignore fixed joints
+    if ~strcmp(RBDtree.Bodies{i}.Joint.Type, 'fixed')
+        % If parent is base frame, set parent to 0
+        if strcmp(RBDtree.Bodies{i}.Parent.Name, RBDtree.BaseName)
+            robot.parent(nb) = 0;
+        else
+            robot.parent(nb) = find(strcmp(RBDtree.BodyNames, RBDtree.Bodies{i}.Parent.Name));
+        end   
+        Ti = RBDtree.Bodies{i}.Joint.JointToParentTransform;
+        robot.Xtree{nb} = pluho(Ti);
+        robot.jtype{nb} = GetJointType(RBDtree.Bodies{i}.Joint.Type, RBDtree.Bodies{i}.Joint.JointAxis);
+        mass = RBDtree.Bodies{i}.Mass;
+        CoM = RBDtree.Bodies{i}.CenterOfMass;
+        inertia = GetInertiaMatrix(RBDtree.Bodies{i}.Inertia) + mass * (CoM*Co);
+        robot.I{nb} = mcI(mass, CoM, inertia);        
+        nb = nb + 1;
+    end            
+end
+end
+
+%%
+function jnt_type = GetJointType(rtb_type, jnt_axis)
+if strcmp(rtb_type, 'revolute')
+    if jnt_axis(1)
+        jnt_type = 'Rx';
+        return
+    end
+    if jnt_axis(2)
+        jnt_type = 'Ry';
+        return
+    end
+    if jnt_axis(3)
+        jnt_type = 'Rz';
+        return
+    end
+end
+if strcmp(rtb_type, 'prismatic')
+    if jnt_axis(1)
+        jnt_type = 'px';
+        return
+    end
+    if jnt_axis(2)
+        jnt_type = 'py';
+        return
+    end
+    if jnt_axis(3)
+        jnt_type = 'pz';
+        return
+    end
+end
+end
+
+%% 
+function iM = GetInertiaMatrix(iV)
+iM = zeros(3,3);
+iM = iM + diag(iV(1:3));
+iM(1,2) = iV(end);
+iM(2,1) = iV(end);
+iM(1,3) = iV(end-1);
+iM(3,1) = iV(end-1);
+iM(2,3) = iV(end-2);
+iM(3,2) = iV(end-2);
+end
+
